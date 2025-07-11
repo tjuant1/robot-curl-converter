@@ -2,3 +2,5 @@ __pycache__
 venv
 logs
 next_steps.txt
+test.robot
+test.py

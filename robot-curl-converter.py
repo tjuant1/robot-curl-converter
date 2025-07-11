@@ -2,8 +2,8 @@ import re
 import os
 
 class GetContent:
-    def __init__(self):
-        self.write_keyword_name = "\nKeyword Name Here\n    "
+    def __init__(self, keyword_name):
+        self.write_keyword_name = f"\n{keyword_name}\n    "
         self.known_body_prefixes = ['--data', '--data-raw', '--form', '--data-urlencode']
         self.json_prefixes = ['json', '--data', '--data-raw']
         self.formdata_prefixes = ['formdata', '--form']
@@ -42,8 +42,13 @@ class GetContent:
         with open(curl_path, encoding='utf-8') as f:
             curl = f.read()
             body = re.findall(fr"{body_prefix}\s+'([^']+)'", curl)
-            body_len = len(body)
+            filtered_item = [item for item in body if "=@" in item]
 
+            if has_file == "y":
+                body = [item for item in body if "=@" not in item]
+
+            body_len = len(body)
+            
         with open(robot_path, 'a') as f:
             f.write(self.write_keyword_name)
             f.write(f"Create Session    session    {url}\n\n")
@@ -58,7 +63,7 @@ class GetContent:
             if has_file == "n":
                 f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    data=${form_data}")
                 return None
-            f.write("\n    ${files}=    Create Dictionary\n    ...    file_path=here\n")
+            f.write(f"\n    ${{files}}=    Create Dictionary\n    ...    {filtered_item[0]}\n")
             f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    files=${files}\n    ...    data=${form_data}")
 
     def content_json(self, headers, robot_path, curl_path, body_prefix):
@@ -143,15 +148,14 @@ class GetContent:
             self.no_body_requisition(headers, robot_path, curl_path)
 
 class RobotCurl:
-    content_class = GetContent()
-
     """
     Keep this way if you want to set paths here before execution
     Path to your curl file, save as .txt
     """
     curl_path = "./curl.txt"
-    body_prefix = "none"
+    body_prefix = "--form"
     robot_path = "./test.robot"
+    keyword_name = "Keyword"
 
     """
     Keep this way if you want to type the paths on the terminal
@@ -175,5 +179,8 @@ class RobotCurl:
     #     else:
     #         body_prefix = input("\nBody prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
 
+    # keyword_name = input("Give the name of the keyword/test case: ")
+
+    content_class = GetContent(keyword_name)
     headers = content_class.get_headers(curl_path)
     content_class.define_curl_type(headers, curl_path, robot_path, body_prefix)
