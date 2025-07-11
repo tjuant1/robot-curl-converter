@@ -149,31 +149,31 @@ class RobotCurl:
     Keep this way if you want to set paths here before execution
     Path to your curl file, save as .txt
     """
-    # curl_path = "./curl.txt"
-    # body_prefix = "--form"
-    # robot_path = "./test.robot"
+    curl_path = "./curl.txt"
+    body_prefix = "none"
+    robot_path = "./test.robot"
 
     """
     Keep this way if you want to type the paths on the terminal
     Path to your curl file, save as .txt
     """
-    while True:
-        curl_path = input("Give the path to the curl file: ")
-        if os.path.exists(curl_path):
-            break
+    # while True:
+    #     curl_path = input("Give the path to the curl file: ")
+    #     if os.path.exists(curl_path):
+    #         break
     
-    while True:
-        robot_path = input("Give the path to write the robotframework code: ")
-        if os.path.exists(robot_path):
-            break
+    # while True:
+    #     robot_path = input("Give the path to write the robotframework code: ")
+    #     if os.path.exists(robot_path):
+    #         break
 
-    with open(curl_path) as f:
-        content = f.read()
-        prefixes = re.findall(r"--[^\s]+", content)
-        if prefixes[-1] != "--header" and prefixes[-1] != "--location":
-            body_prefix = prefixes[-1]
-        else:
-            body_prefix = input("\nBody prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
+    # with open(curl_path) as f:
+    #     content = f.read()
+    #     prefixes = re.findall(r"--[^\s]+", content)
+    #     if prefixes[-1] != "--header" and prefixes[-1] != "--location":
+    #         body_prefix = prefixes[-1]
+    #     else:
+    #         body_prefix = input("\nBody prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
 
     headers = content_class.get_headers(curl_path)
     content_class.define_curl_type(headers, curl_path, robot_path, body_prefix)
