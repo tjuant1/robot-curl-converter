@@ -125,21 +125,21 @@ class GetContent:
 
     def define_curl_type(self, headers, curl_path, robot_path, req_type):
         if req_type.lower() in self.formdata_prefixes:
-            print("--Prefix identified, formdata fomat selected--")
+            print("\nPrefix identified, formdata format selected\n")
             has_file = input("This request has a file? (Y/N):  ")
             has_file_formated = has_file.strip().lower()
             self.content_formdata(robot_path, curl_path, req_type, has_file_formated)
 
         elif req_type.lower() in self.json_prefixes:
-            print("--Prefix identified, json fomat selected--")
+            print("\nPrefix identified, json format selected\n")
             self.content_json(headers, robot_path, curl_path, req_type)
 
         elif req_type.lower() in self.urlencoded_prefixes:
-            print("--Prefix identified, urlencoded fomat selected--")
+            print("\nPrefix identified, urlencoded format selected\n")
             self.content_urlencoded(headers, robot_path, curl_path, req_type)
 
         elif req_type.lower() == "none":
-            print("None parameter received, changing request type.")
+            print("\nNone parameter received, changing request type.\n")
             self.no_body_requisition(headers, robot_path, curl_path)
 
 class RobotCurl:
@@ -150,7 +150,7 @@ class RobotCurl:
     Path to your curl file, save as .txt
     """
     # curl_path = "./curl.txt"
-    # body_prefix = ""
+    # body_prefix = "--form"
     # robot_path = "./test.robot"
 
     """
@@ -160,13 +160,11 @@ class RobotCurl:
     while True:
         curl_path = input("Give the path to the curl file: ")
         if os.path.exists(curl_path):
-            print("-File Found!")
             break
     
     while True:
         robot_path = input("Give the path to write the robotframework code: ")
         if os.path.exists(robot_path):
-            print("-File Found!")
             break
 
     with open(curl_path) as f:
@@ -174,10 +172,8 @@ class RobotCurl:
         prefixes = re.findall(r"--[^\s]+", content)
         if prefixes[-1] != "--header" and prefixes[-1] != "--location":
             body_prefix = prefixes[-1]
-            print(f"prefixes: {body_prefix}")
         else:
-            print("else")
-            body_prefix = input("Body prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
+            body_prefix = input("\nBody prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
 
     headers = content_class.get_headers(curl_path)
     content_class.define_curl_type(headers, curl_path, robot_path, body_prefix)
