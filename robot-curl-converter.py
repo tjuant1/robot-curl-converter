@@ -35,7 +35,7 @@ class GetContent:
             values_list.append(f"...    {robot_format}\n    ")
         return values_list
 
-    def content_formdata(self, headers, robot_path, curl_path, body_prefix, has_file):
+    def content_formdata(self, robot_path, curl_path, body_prefix, has_file):
         indice = 0
         url = self.get_url(curl_path)
 
@@ -55,16 +55,11 @@ class GetContent:
 
         indice = 0
         with open(robot_path, 'a') as f:
-            f.write("\n    ${headers}=    Create Dictionary\n    ")
-            while indice < len(headers):
-                header_value = headers[indice]
-                f.write(header_value)
-                indice += 1
             if has_file == "n":
-                f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    headers=${headers}\n    ...    data=${data}")
+                f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    data=${form_data}")
                 return None
             f.write("\n    ${files}=    Create Dictionary\n    ...    file_path=here\n")
-            f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    headers=${headers}\n    ...    files=${files}\n    ...    data=${form_data}")
+            f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    files=${files}\n    ...    data=${form_data}")
 
     def content_json(self, headers, robot_path, curl_path, body_prefix):
         indice = 0
@@ -133,7 +128,7 @@ class GetContent:
             print("--Prefix identified, formdata fomat selected--")
             has_file = input("This request has a file? (Y/N):  ")
             has_file_formated = has_file.strip().lower()
-            self.content_formdata(headers, robot_path, curl_path, req_type, has_file_formated)
+            self.content_formdata(robot_path, curl_path, req_type, has_file_formated)
 
         elif req_type.lower() in self.json_prefixes:
             print("--Prefix identified, json fomat selected--")
@@ -154,9 +149,9 @@ class RobotCurl:
     Keep this way if you want to set paths here before execution
     Path to your curl file, save as .txt
     """
-    # curl_path = ""
+    # curl_path = "./curl.txt"
     # body_prefix = ""
-    # robot_path = ""
+    # robot_path = "./test.robot"
 
     """
     Keep this way if you want to type the paths on the terminal
@@ -177,9 +172,11 @@ class RobotCurl:
     with open(curl_path) as f:
         content = f.read()
         prefixes = re.findall(r"--[^\s]+", content)
-        if prefixes[-1] != "--header":
+        if prefixes[-1] != "--header" and prefixes[-1] != "--location":
             body_prefix = prefixes[-1]
+            print(f"prefixes: {body_prefix}")
         else:
+            print("else")
             body_prefix = input("Body prefix not recognized.\nPlease type the requisition type or none if doesnt have body (formats: json, formdata or urlencoded): ")
 
     headers = content_class.get_headers(curl_path)
