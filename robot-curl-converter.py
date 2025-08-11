@@ -35,7 +35,7 @@ class GetContent:
             values_list.append(f"...    {robot_format}\n    ")
         return values_list
 
-    def content_formdata(self, robot_path, curl_path, body_prefix, has_file):
+    def content_formdata(self, robot_path, curl_path, body_prefix, has_file, headers):
         indice = 0
         url = self.get_url(curl_path)
 
@@ -52,16 +52,24 @@ class GetContent:
         with open(robot_path, 'a') as f:
             f.write(self.write_keyword_name)
             f.write(f"Create Session    session    {url}\n\n")
-            f.write("    ${form_data}=    Create Dictionary\n    ")
+
+            f.write("    ${headers}=    Create Dictionary\n    ")
+            indice = 0
+            while indice < len(headers):
+                header_value = headers[indice]
+                f.write(header_value)
+                indice += 1
+
+            f.write("\n    ${form_data}=    Create Dictionary\n    ")
+            indice = 0
             while indice < body_len:
                 body_new = body[indice]
                 f.write(f"...    {body_new}\n    ")
                 indice += 1
-
-        indice = 0
+        
         with open(robot_path, 'a') as f:
             if has_file == "n":
-                f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    data=${form_data}")
+                f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    data=${form_data}\n    ...    headers=${headers}")
                 return None
             f.write(f"\n    ${{files}}=    Create Dictionary\n    ...    {filtered_item[0]}\n")
             f.write("\n    ${response}=    REQUEST On Session    session    /\n    ...    files=${files}\n    ...    data=${form_data}")
@@ -133,7 +141,7 @@ class GetContent:
             print("\nPrefix identified, formdata format selected\n")
             has_file = input("This request has a file? (Y/N):  ")
             has_file_formated = has_file.strip().lower()
-            self.content_formdata(robot_path, curl_path, req_type, has_file_formated)
+            self.content_formdata(robot_path, curl_path, req_type, has_file_formated, headers)
 
         elif req_type.lower() in self.json_prefixes:
             print("\nPrefix identified, json format selected\n")
